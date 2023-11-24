@@ -1,0 +1,7 @@
+    <h2>Artículos</h2>
+    <ul>
+        {% for articulo in articulos %}
+            <li>{{ articulo.titulo }}</li>
+            <li><small>{{ articulo.subtitulo }}</small></li>
+        {% endfor %}
+    </ul>
