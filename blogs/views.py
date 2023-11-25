@@ -1,15 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.http import HttpResponse
+from django.urls import reverse
+
+from blogs.forms import FormularioArticulo
 from .models import Articulo
 from django.template import loader
 
 from django.views.generic import ListView
 # Create your views here.
-
-
-def detail(request, question_id):
-    return HttpResponse("You're looking at question %s." % question_id)
-
 
 def listar_articulos(request):
     contexto = { "articulos": Articulo.objects.all(), }
@@ -20,6 +18,77 @@ def listar_articulos(request):
     )
     return http_response
 
+# C = CREATE
+def crear_articulo(request):
+    if request.method == "POST":
+        formulario = FormularioArticulo(request.POST)
 
-def vote(request, question_id):
-    return HttpResponse("You're voting on question %s." % question_id)
+        if formulario.is_valid():
+            data = formulario.cleaned_data  # es un diccionario
+            articulo = Articulo.objects.create(
+                titulo=data['titulo'],
+                subtitulo=data['subtitulo'],
+                cuerpo=data['cuerpo'],
+                autor=data['autor'],
+                imagen=data['imagen'],
+            ) # Lo guarda en la Base de datos
+
+            # Redireccionar al usuario a la lista de artículos
+            url_exitosa = reverse('articulos')  # estudios/articulos/
+            return redirect(url_exitosa)
+    else:  # GET
+        formulario = FormularioArticulo()
+    
+    http_response = render(
+        request=request,
+        template_name='blogs/crear_editar_articulo.html',
+        context={'form': formulario}
+    )
+    return http_response
+
+# R = READ
+def detalle_articulo(request, articulo_id):
+    articulo = Articulo.objects.get(id=articulo_id)
+    http_response = render(
+        request=request,
+        template_name='blogs/detalle_articulo.html',
+        context={'articulo': articulo}
+    )
+    return http_response
+
+# U = UPDATE
+def editar_articulo(request, articulo_id):
+    articulo = Articulo.objects.get(id=articulo_id)
+    if request.method == "POST":
+        formulario = FormularioArticulo(request.POST, instance=articulo)
+
+        if formulario.is_valid():
+            data = formulario.cleaned_data  # es un diccionario
+            articulo.titulo = data['titulo']
+            articulo.subtitulo = data['subtitulo']
+            articulo.cuerpo = data['cuerpo']
+            articulo.autor = data['autor']
+            articulo.imagen = data['imagen']
+            articulo.save()
+
+            # Redireccionar al usuario a la lista de artículos
+            url_exitosa = reverse('articulos')  # estudios/articulos/
+            return redirect(url_exitosa)
+    else:  # GET
+        formulario = FormularioArticulo(instance=articulo)
+    
+    http_response = render(
+        request=request,
+        template_name='blogs/crear_editar_articulo.html',
+        context={'form': formulario}
+    )
+    return http_response
+
+# D = DELETE
+def eliminar_articulo(request, articulo_id):
+    articulo = Articulo.objects.get(id=articulo_id)
+    articulo.delete()
+    url_exitosa = reverse('articulos')
+    return redirect(url_exitosa)
+
+
