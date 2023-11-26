@@ -3,7 +3,7 @@
   body {
     background-color: floralwhite;
   }
-  input[type=text], select, textarea {
+  input, select, textarea, button {
     width: 100%;
     padding: 12px;
     border: 1px solid #ccc;
@@ -33,11 +33,19 @@
 
 </style>
 <div style="width: 100%; display: flex; align-items: center; font-family: Arial, Helvetica, sans-serif; flex-direction: column;">
-  <form method="post" enctype="multipart/form-data">
+  <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    {{ form.errors }}
-    <input type="submit" value="Enviar" />
+    {{ formulario.as_p }}
+    <input type="submit" value="Iniciar sesión" />
   </form>
+
+  <a href="{% url 'registro' %}">
+    <button style="padding: 10px; border: none; border-radius: 5px; background-color: rgb(70, 69, 69); color: white; font-weight: bold; cursor: pointer;">
+      Regístrate
+    </button>
+  </a>
+
+
+
 </div>
 

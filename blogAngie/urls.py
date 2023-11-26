@@ -19,8 +19,11 @@ from django.urls import include, path
 from django.conf.urls.static import static
 from django.conf import settings
 
+from blogAngie.views import view_inicio
+
 urlpatterns = (
     [
+        path('', view_inicio, name='inicio'),
         path('admin/', admin.site.urls),
         path('blogs/', include('blogs.urls')),
         path('perfiles/', include('perfiles.urls')),

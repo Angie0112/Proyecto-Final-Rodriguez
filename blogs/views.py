@@ -10,7 +10,11 @@ from django.views.generic import ListView
 # Create your views here.
 
 def listar_articulos(request):
-    contexto = { "articulos": Articulo.objects.all(), }
+    contexto = { 
+        "articulos": Articulo.objects.all(),
+        "userIsAuthenticated": request.user.is_authenticated,
+        "user": request.user,
+    }
     http_response = render(
         request=request,
         template_name='blogs/lista_articulos.html',
@@ -21,21 +25,18 @@ def listar_articulos(request):
 # C = CREATE
 def crear_articulo(request):
     if request.method == "POST":
-        formulario = FormularioArticulo(request.POST)
+        formulario = FormularioArticulo(request.POST, request.FILES)
 
-        if formulario.is_valid():
-            data = formulario.cleaned_data  # es un diccionario
-            articulo = Articulo.objects.create(
-                titulo=data['titulo'],
-                subtitulo=data['subtitulo'],
-                cuerpo=data['cuerpo'],
-                autor=data['autor'],
-                imagen=data['imagen'],
-            ) # Lo guarda en la Base de datos
+        if request.user.is_authenticated:
+            autor = request.user
+            if formulario.is_valid():
+                articulo = formulario.save(commit=False)
+                articulo.autor = autor
+                articulo.save()
 
-            # Redireccionar al usuario a la lista de artículos
-            url_exitosa = reverse('articulos')  # estudios/articulos/
-            return redirect(url_exitosa)
+                # Redireccionar al usuario a la lista de artículos
+                url_exitosa = reverse('articulos')  # estudios/articulos/
+                return redirect(url_exitosa)
     else:  # GET
         formulario = FormularioArticulo()
     
@@ -60,16 +61,10 @@ def detalle_articulo(request, articulo_id):
 def editar_articulo(request, articulo_id):
     articulo = Articulo.objects.get(id=articulo_id)
     if request.method == "POST":
-        formulario = FormularioArticulo(request.POST, instance=articulo)
+        formulario = FormularioArticulo(request.POST, request.FILES, instance=articulo)
 
         if formulario.is_valid():
-            data = formulario.cleaned_data  # es un diccionario
-            articulo.titulo = data['titulo']
-            articulo.subtitulo = data['subtitulo']
-            articulo.cuerpo = data['cuerpo']
-            articulo.autor = data['autor']
-            articulo.imagen = data['imagen']
-            articulo.save()
+            articulo = formulario.save()
 
             # Redireccionar al usuario a la lista de artículos
             url_exitosa = reverse('articulos')  # estudios/articulos/

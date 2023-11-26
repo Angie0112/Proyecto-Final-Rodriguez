@@ -6,4 +6,4 @@ class FormularioArticulo(forms.ModelForm):
 
     class Meta:
         model = Articulo
-        fields = "__all__"
+        exclude = ['autor']
